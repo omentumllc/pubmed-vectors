@@ -1,9 +1,9 @@
 tqdm
 numpy
-torch 
-torchvision 
+torch
+torchvision
 torchaudio
-sentence-transformers 
+sentence-transformers
 transformers
 aiofiles
 einops
@@ -14,3 +14,6 @@ pyarrow
 pandas
 dask[complete]
 s3fs
+faiss-cpu
+onnxruntime
+optimum[onnxruntime]
