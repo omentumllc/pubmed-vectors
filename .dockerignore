@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.git/
+*.dat
+*.h5
+*.hdf5
+*.parquet
+*.db
+faiss_index/
+*.out
+*.err
+.env

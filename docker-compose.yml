@@ -1,0 +1,63 @@
+# Docker Compose for PubMed vector search
+#
+# Prerequisites:
+#   1. Docker Desktop memory: Settings -> Resources -> Memory >= 8GB
+#      (for 3M vectors; use 12GB+ for 36M vectors)
+#   2. Place your data files in ./data/:
+#      - pubmed_embeddings.h5 (or .parquet)
+#      - pubmed_abstracts_2024.db
+#
+# Usage:
+#   # Build the image
+#   docker compose build
+#
+#   # One-time: build the FAISS index from your embeddings
+#   docker compose run build-index
+#
+#   # Interactive search
+#   docker compose run query
+#
+
+services:
+  # One-time: build FAISS index from existing embeddings
+  # Reads HDF5/Parquet, outputs faiss_index/ directory
+  build-index:
+    build: .
+    volumes:
+      - ./data:/data
+      - hf-cache:/root/.cache/huggingface
+    command:
+      - build_faiss_index.py
+      - --source
+      - /data/pubmed_embeddings.h5
+      - --output
+      - /data/faiss_index/
+      - --index-type
+      - auto
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+  # Interactive query shell
+  query:
+    build: .
+    volumes:
+      - ./data:/data
+      - hf-cache:/root/.cache/huggingface
+    command:
+      - test_pubmed_faiss.py
+      - --index-dir
+      - /data/faiss_index
+      - --db
+      - /data/pubmed_abstracts_2024.db
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        limits:
+          memory: 6G
+
+volumes:
+  # Persist HuggingFace model downloads and ONNX exports across container restarts
+  hf-cache:
